@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手写</title>
+    <style>
+        canvas {
+            border: 1px solid aqua;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <canvas id="canvas" width="510" height="330"></canvas>
+        <button class="clear">清空</button>
+        <button class="back">回退</button>
+    </div>
+
+    <script src="./handwritingapi.js"></script>
+    <script>
+        function init() {
+            QQShuru.HWPanel({
+                canvasId: "#canvas",
+                lineColor: "#85fbfd",
+                backBtnId: ".back",
+                clearBtnId: ".clear",
+                callback: callbackfunc,
+            });
+        }
+
+        function callbackfunc(res) {
+            console.log('%c [res]:', 'color:red;font-weight:700;', res);
+        }
+
+        init()
+    </script>
+</body>
+
+</html>
