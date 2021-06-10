@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            display: flex;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        .box {
+            width: 100px;
+            height: 100px;
+            box-sizing: border-box;
+            border: 1px solid red;
+            margin: 10px;
+        }
+
+        .modal {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-color: rgba(0,255,255,0.5);
+            box-sizing: border-box;
+            border: 1px solid springgreen;
+        }
+
+        .bg-1 {
+            background: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">1</div>
+    <div class="box">2</div>
+    <div class="box">3</div>
+    <div class="box">4</div>
+    <div class="box">5</div>
+    <div class="box">6</div>
+    <div class="box">7</div>
+    <div class="box">8</div>
+    <div class="box">9</div>
+    <div class="box">10</div>
+    <div class="box">11</div>
+    <div class="box">12</div>
+
+
+    <script> 
+    // document.addEventListener('mouseup', (e)=>{
+    //     const selObj = window.getSelection();
+    //     console.log(selObj);
+    //     let selRange = selObj.getRangeAt(0);
+    //     console.log(selRange);
+
+    //     console.log(selObj.toString());
+    // })
+
+    document.onselectstart = function(){return false;}; 
+
+    let mouse_start = {x:0,y:0};
+    let mouse_end = {x:0,y:0};
+
+    const boxList = document.querySelectorAll('.box');
+    const content = [...boxList].map(e=>{
+        return {
+            el:e,
+            top: e.offsetTop,
+            left: e.offsetLeft,
+        }
+    });
+
+    console.log(content);
+
+    const mousedown = (e) => {
+        const dom = document.querySelector('.modal');
+        dom && document.body.removeChild(dom)
+
+        mouse_start = {
+            x: e.pageX,
+            y: e.pageY
+        }
+    }
+
+    const mouseup = (e) => {
+   
+        mouse_end = {
+            x: e.pageX,
+            y: e.pageY
+        }
+
+        console.table(mouse_start);
+        console.table(mouse_end);
+
+        console.log(mouse_start, mouse_end);
+      
+        let dom = document.createElement('div');
+        dom.classList.add('modal');
+        dom.style.left = mouse_start.x + 'px';
+        dom.style.top = mouse_start.y + 'px';
+        dom.style.width = mouse_end.x - mouse_start.x + 'px';
+        dom.style.height = mouse_end.y - mouse_start.y + 'px';
+
+        document.body.appendChild(dom);
+
+        const range_start = [mouse_start.x, mouse_end.x], 
+         rang_end = [mouse_start.y, mouse_end.y];
+
+        const result = content.reduce((prev,cur)=>{
+            // debugger
+            if((cur.left < range_start[1] && cur.left>range_start[0]) && (cur.top < rang_end[1] && cur.top>rang_end[0] )) {
+                cur.el.classList.add('bg-1');
+                return prev.concat(cur)
+            }else {
+                cur.el.classList.remove('bg-1');
+                return prev;
+            }
+        },[]);
+        console.log(result);
+    }
+
+    document.addEventListener('mouseup', mouseup)
+        
+    document.addEventListener('mousedown', mousedown)
+
+
+    </script>
+</body>
+</html>
