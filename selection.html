@@ -69,10 +69,30 @@
             el:e,
             top: e.offsetTop,
             left: e.offsetLeft,
+            right: e.offsetLeft + e.offsetWidth,
+            bottom: e.offsetTop + e.offsetHeight
         }
     });
 
     console.log(content);
+    const mousemove = (e) => {
+        mouse_end = {
+            x: e.pageX,
+            y: e.pageY
+        }
+
+        const ori_dom = document.querySelector('.modal');
+        ori_dom && document.body.removeChild(ori_dom)
+
+        let dom = document.createElement('div');
+        dom.classList.add('modal');
+        dom.style.left = mouse_start.x + 'px';
+        dom.style.top = mouse_start.y + 'px';
+        dom.style.width = mouse_end.x - mouse_start.x + 'px';
+        dom.style.height = mouse_end.y - mouse_start.y + 'px';
+
+        document.body.appendChild(dom);
+    }
 
     const mousedown = (e) => {
         const dom = document.querySelector('.modal');
@@ -82,6 +102,8 @@
             x: e.pageX,
             y: e.pageY
         }
+
+       document.addEventListener('mousemove', mousemove);
     }
 
     const mouseup = (e) => {
@@ -91,26 +113,16 @@
             y: e.pageY
         }
 
-        console.table(mouse_start);
-        console.table(mouse_end);
+        document.removeEventListener('mousemove', mousemove);
 
         console.log(mouse_start, mouse_end);
       
-        let dom = document.createElement('div');
-        dom.classList.add('modal');
-        dom.style.left = mouse_start.x + 'px';
-        dom.style.top = mouse_start.y + 'px';
-        dom.style.width = mouse_end.x - mouse_start.x + 'px';
-        dom.style.height = mouse_end.y - mouse_start.y + 'px';
-
-        document.body.appendChild(dom);
-
         const range_start = [mouse_start.x, mouse_end.x], 
          rang_end = [mouse_start.y, mouse_end.y];
 
         const result = content.reduce((prev,cur)=>{
             // debugger
-            if((cur.left < range_start[1] && cur.left>range_start[0]) && (cur.top < rang_end[1] && cur.top>rang_end[0] )) {
+            if(isInFuncArea(cur, range_start, rang_end)) {
                 cur.el.classList.add('bg-1');
                 return prev.concat(cur)
             }else {
@@ -118,13 +130,18 @@
                 return prev;
             }
         },[]);
-        console.log(result);
+
+        console.log(result)
     }
 
     document.addEventListener('mouseup', mouseup)
         
     document.addEventListener('mousedown', mousedown)
 
+    function isInFuncArea(data, range_start, rang_end) {
+        return (data.left < range_start[1] && data.left>range_start[0] && data.top < rang_end[1] && data.top>rang_end[0])
+        || (data.right < range_start[1] && data.right > range_start[0] && data.bottom < rang_end[1] && data.top>rang_end[0])
+    }
 
     </script>
 </body>
