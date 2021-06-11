@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>画布</title>
+    <style>
+        canvas {
+            position: relative;
+        }
+
+        .eraser {
+            width: 20px;
+            height: 20px;
+            background-color: aqua;
+            border-radius: 50%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="1000" height="500" style="border:1px solid red;">
+        这里写提示版本信息：您的浏览器版本太低，点击
+        <a href="###">下载</a>最新版本
+    </canvas>
+
+    <div class="eraser"></div>
+    <div>
+        <button class="clear">清空画布</button>
+        <button class="remove">擦除</button>
+        <button class="back">画笔</button>
+    </div>
+
+    <script>
+        let isRemove = false;
+        //获取元素canvas
+        var myCanvas = document.getElementById("myCanvas");
+        //设置画本基于2D形变
+        var context = myCanvas.getContext('2d');
+        //鼠标按下，获取当前位置
+        myCanvas.onmousedown = function (ev) {
+            //兼容IE写法
+            var obj = ev || window.event;
+            //鼠标按下事件，获取鼠标位于元素内部的当前位置，也就是画笔开始的位置
+            var startX = obj.clientX - myCanvas.offsetLeft;
+            var startY = obj.clientY - myCanvas.offsetTop;
+            // 新建路径（图层），这里一定不能省略，表明路径开始，如果省略，不会报错，但是会造成将所有的东西都画在一个图层上，造成相互影响
+            context.beginPath();
+            //画笔开始位置
+            context.moveTo(startX, startY);
+            //鼠标移动，获取当前位置，这里一定要写在onmousedown事件里面
+            myCanvas.onmousemove = function (ev) {
+                var obj = ev || window.event;
+                //拖动的时候重新获取鼠标的位置，作为画笔结束的位置，鼠标一直拖动，一直会触发这个事件。
+                var endX = obj.clientX - myCanvas.offsetLeft;
+                var endY = obj.clientY - myCanvas.offsetTop;
+                context.lineTo(endX, endY);
+                //设置线条颜色
+                context.strokeStyle = isRemove ? '#fff' : "red";
+                //设置线条宽度，5像素
+                context.lineWidth = isRemove ? 20 : 5;
+                // 将图形渲染到画布上，否则虽然画了东西，但是显示不出来
+                context.stroke();
+            }
+        }
+        //鼠标抬起，清空鼠标移动事件
+        myCanvas.onmouseup = function () {
+            myCanvas.onmousemove = null;
+        }
+
+        function onmousemove(e) {
+            eraser.style.left = e.pageX + 'px';
+            eraser.style.top = e.pageY + 'px';
+        }
+
+        const remove = document.querySelector('.remove');
+        let eraser = document.querySelector('.eraser');
+
+        document.querySelector('.clear').onclick = () => {
+            context.clearRect(0, 0, 1000, 500);
+            eraser.style.display = 'none';
+            myCanvas.removeEventListener('mousemove', onmousemove);
+        }
+
+        remove.onclick = () => {
+            isRemove = true;
+            console.log(eraser);
+            eraser.style.display = 'block';
+            myCanvas.addEventListener('mousemove', onmousemove);
+        }
+
+        const back = document.querySelector('.back');
+        back.onclick = () => {
+            isRemove = false;
+            eraser.style.display = 'none';
+            myCanvas.removeEventListener('mousemove', onmousemove);
+        }
+
+    </script>
+</body>
+
+</html>
