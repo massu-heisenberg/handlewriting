@@ -36,6 +36,21 @@
         .modal-choose-bg {
             background: #8eefef;
         }
+
+        .context-menu {
+            position: absolute;
+            left: 0;
+            top: 0;
+            box-sizing: border-box;
+            border: 1px solid rgb(238, 238, 238);
+            background-color: rgb(238, 238, 238);
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            padding: 10px;
+            cursor: pointer;
+            display: none;
+        }
     </style>
 </head>
 
@@ -57,19 +72,23 @@
     <div class="box">15</div>
     <div class="box">16</div>
 
+    <div class="context-menu" id="context-menu">
+        <div class="open">开启扩展</div>
+        <div class="close">关闭扩展</div>
+    </div>
 
     <script>
         let result = [];
         let mousedownTime = null,
             mouseupTime = null;
-
-        document.onselectstart = function () { return false; };
-
         let mouse_start = { x: 0, y: 0 };
         let mouse_end = { x: 0, y: 0 };
+        let isRun = true;
 
         const boxList = document.querySelectorAll('.box');
         let content = calcBoxList();
+
+        document.onselectstart = function () { return false; };
 
         function calcBoxList() {
             return [...boxList].map(e => {
@@ -112,6 +131,8 @@
         }
 
         const mousedown = (e) => {
+            if (!isRun) return;
+
             mousedownTime = +new Date();
 
             removeModal();
@@ -122,9 +143,11 @@
             }
 
             document.addEventListener('mousemove', mousemove);
+
         }
 
         const mouseup = (e) => {
+            if (!isRun) return;
             mouseupTime = +new Date();
 
             mouse_end = {
@@ -161,6 +184,7 @@
         document.addEventListener('mousedown', mousedown)
 
         window.addEventListener('resize', (e) => {
+            if (!isRun) return;
             removeModal();
             content = calcBoxList();
         })
@@ -188,6 +212,30 @@
                 || (end_x < max_left && end_x > left && end_x > top && end_y < max_top)
                 || (start_x < left && end_x > max_left && start_y > top && end_y < max_top)
         }
+
+        document.oncontextmenu = function (e) {
+            // console.log(e);
+            e.preventDefault();
+            const dom = document.querySelector('.context-menu');
+            let x = e.pageX, y = e.pageY;
+            dom.style.left = x + 'px';
+            dom.style.top = y + 'px';
+            dom.style.display = 'block';
+        }
+
+        document.onclick = () => {
+            const dom = document.querySelector('.context-menu');
+            dom.style.display = 'none';
+        }
+
+        document.querySelector('.open').onclick = () => {
+            isRun = true;
+        }
+
+        document.querySelector('.close').onclick = () => {
+            isRun = false;
+        }
+
     </script>
 </body>
 
