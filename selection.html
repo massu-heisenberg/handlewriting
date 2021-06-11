@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Area Move</title>
     <style>
         body {
             display: flex;
@@ -17,7 +17,7 @@
             width: 100px;
             height: 100px;
             box-sizing: border-box;
-            border: 1px solid red;
+            border: 1px solid #0095ff;
             margin: 10px;
         }
 
@@ -25,13 +25,13 @@
             position: absolute;
             left: 0;
             top: 0;
-            background-color: rgba(0, 255, 255, 0.5);
+            background-color: rgba(126, 192, 224, 0.5);
             box-sizing: border-box;
-            border: 1px solid springgreen;
+            border: 1px solid #0095ff;
         }
 
-        .red {
-            background: red;
+        .modal-choose-bg {
+            background: aqua;
         }
     </style>
 </head>
@@ -140,13 +140,15 @@
                 let choosed = isInFuncArea(cur, mouse_start, mouse_end);
                 if (!choosed) choosed = isFuncAreaInItem(cur, mouse_start, mouse_end);
                 if (choosed) {
-                    cur.el.classList.add('red');
+                    cur.el.classList.add('modal-choose-bg');
                     return prev.concat(cur)
                 } else {
-                    cur.el.classList.remove('red');
+                    cur.el.classList.remove('modal-choose-bg');
                     return prev;
                 }
             }, []);
+
+            removeModal(false);
 
             console.log(result)
         }
@@ -160,8 +162,8 @@
             content = calcBoxList();
         })
 
-        function removeModal() {
-            content.forEach(i => i.el.classList.remove('red'));
+        function removeModal(isRemoveStyle = true) {
+            isRemoveStyle && content.forEach(i => i.el.classList.remove('modal-choose-bg'));
             const dom = document.querySelector('.modal');
             dom && document.body.removeChild(dom)
         }
