@@ -57,6 +57,8 @@
 
     <script>
         let result = [];
+        let isRun = true;
+        let mousedownTime = null, mouseupTime = null;
 
         document.onselectstart = function () { return false; };
 
@@ -83,6 +85,12 @@
         }
 
         const mousemove = (e) => {
+            // 如果是点击事件就取消
+            if (+new Date() - mousedownTime < 100) {
+                return;
+            }
+            console.log('go move');
+
             mouse_end = {
                 x: e.pageX,
                 y: e.pageY
@@ -101,6 +109,8 @@
         }
 
         const mousedown = (e) => {
+            mousedownTime = +new Date();
+
             removeModal();
 
             mouse_start = {
@@ -112,6 +122,7 @@
         }
 
         const mouseup = (e) => {
+            mouseupTime = +new Date();
 
             mouse_end = {
                 x: e.pageX,
@@ -119,6 +130,11 @@
             }
 
             document.removeEventListener('mousemove', mousemove);
+
+            // 如果是点击事件就取消
+            if (mouseupTime - mousedownTime < 100) {
+                return;
+            }
 
             result = content.reduce((prev, cur) => {
                 let choosed = isInFuncArea(cur, mouse_start, mouse_end);
@@ -139,14 +155,13 @@
 
         document.addEventListener('mousedown', mousedown)
 
-
         window.addEventListener('resize', (e) => {
-            content.forEach(i => i.el.classList.remove('red'));
             removeModal();
             content = calcBoxList();
         })
 
         function removeModal() {
+            content.forEach(i => i.el.classList.remove('red'));
             const dom = document.querySelector('.modal');
             dom && document.body.removeChild(dom)
         }
