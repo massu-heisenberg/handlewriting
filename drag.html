@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #box {
+            width: 100px;
+            height: 100px;
+            background: pink;
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: ghostwhite;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="box">拖拽</div>
+    <script>
+        //元素鼠标按下事件   
+        //当鼠标在这个元素身上按下的时候 就会触发回调函数  
+        box.onmousedown = function (event) {
+            event = event || window.event;
+            // 获取元素起始位置
+            var eleX = box.offsetLeft;
+            var eleY = box.offsetTop;
+            // 鼠标按下的坐标
+            var startX = event.clientX;
+            var startY = event.clientY;
+            // 低版本ie选中文字，不能拖拽，低版本自带功能
+            // 解决方案：开启全局捕获
+            // 把所有后续的鼠标事件全部强制到这个元素身上，不让事件去处理文字
+            box.setCapture && box.setCapture();
+            //鼠标抬起事件
+            document.onmousemove = function (event) {
+                console.log('移动');
+                event = event || window.event;
+                // 获取鼠标移动后的位置
+                var endX = event.clientX;
+                var endY = event.clientY;
+                // 鼠标距离差 = 鼠标移动后位置 - 鼠标按下的位置
+                var disX = endX - startX;
+                var disY = endY - startY;
+                // 元素最终的位置 = 元素初始位置 + 鼠标距离差
+                var lastX = eleX + disX;
+                var lastY = eleY + disY;
+                console.log(lastX, lastY);
+
+                // 边界值判断  (吸附效果)
+                // 边界值判断逻辑 大于最大值等于最大值 小于最小值等于最小值
+                if (lastX > document.documentElement.clientWidth - box.offsetWidth - 20) {
+                    lastX = document.documentElement.clientWidth - box.offsetWidth;
+                } else if (lastX < 20) {
+                    lastX = 0;
+                }
+                if (lastY > document.documentElement.clientHeight - box.offsetHeight - 20) {
+                    lastY = document.documentElement.clientHeight - box.offsetHeight;
+                } else if (lastY < 20) {
+                    lastY = 0;
+                }
+                // 设置元素移动位置
+                box.style.left = lastX + 'px';
+                box.style.top = lastY + 'px';
+            };
+
+            //鼠标抬起事件
+            document.onmouseup = function () {
+                document.onmousemove = null;
+                // 针对低版本浏览器要在逻辑结束的地方 释放全局捕获
+                box.releaseCapture && box.releaseCapture();
+            };
+            return false;
+        };
+
+    </script>
+</body>
+
+</html>
