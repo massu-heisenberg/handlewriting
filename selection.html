@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,6 +12,7 @@
             flex-wrap: wrap;
             position: relative;
         }
+
         .box {
             width: 100px;
             height: 100px;
@@ -23,16 +25,17 @@
             position: absolute;
             left: 0;
             top: 0;
-            background-color: rgba(0,255,255,0.5);
+            background-color: rgba(0, 255, 255, 0.5);
             box-sizing: border-box;
             border: 1px solid springgreen;
         }
 
-        .bg-1 {
+        .red {
             background: red;
         }
     </style>
 </head>
+
 <body>
     <div class="box">1</div>
     <div class="box">2</div>
@@ -46,103 +49,126 @@
     <div class="box">10</div>
     <div class="box">11</div>
     <div class="box">12</div>
+    <div class="box">13</div>
+    <div class="box">14</div>
+    <div class="box">15</div>
+    <div class="box">16</div>
 
 
-    <script> 
-    // document.addEventListener('mouseup', (e)=>{
-    //     const selObj = window.getSelection();
-    //     console.log(selObj);
-    //     let selRange = selObj.getRangeAt(0);
-    //     console.log(selRange);
+    <script>
+        let result = [];
 
-    //     console.log(selObj.toString());
-    // })
+        document.onselectstart = function () { return false; };
 
-    document.onselectstart = function(){return false;}; 
+        let mouse_start = { x: 0, y: 0 };
+        let mouse_end = { x: 0, y: 0 };
 
-    let mouse_start = {x:0,y:0};
-    let mouse_end = {x:0,y:0};
+        const boxList = document.querySelectorAll('.box');
+        let content = calcBoxList();
 
-    const boxList = document.querySelectorAll('.box');
-    const content = [...boxList].map(e=>{
-        return {
-            el:e,
-            top: e.offsetTop,
-            left: e.offsetLeft,
-            right: e.offsetLeft + e.offsetWidth,
-            bottom: e.offsetTop + e.offsetHeight
-        }
-    });
-
-    console.log(content);
-    const mousemove = (e) => {
-        mouse_end = {
-            x: e.pageX,
-            y: e.pageY
+        function calcBoxList() {
+            return [...boxList].map(e => {
+                return {
+                    el: e,
+                    top: e.offsetTop,
+                    left: e.offsetLeft,
+                    max_top: e.offsetTop + e.offsetHeight,
+                    max_left: e.offsetLeft + e.offsetWidth,
+                    top_left: [e.offsetLeft, e.offsetTop],
+                    top_right: [e.offsetLeft + e.offsetWidth, e.offsetTop],
+                    bottom_left: [e.offsetLeft, e.offsetTop + e.offsetHeight],
+                    bottom_right: [e.offsetLeft + e.offsetWidth, e.offsetTop + e.offsetHeight]
+                }
+            });
         }
 
-        const ori_dom = document.querySelector('.modal');
-        ori_dom && document.body.removeChild(ori_dom)
-
-        let dom = document.createElement('div');
-        dom.classList.add('modal');
-        dom.style.left = mouse_start.x + 'px';
-        dom.style.top = mouse_start.y + 'px';
-        dom.style.width = mouse_end.x - mouse_start.x + 'px';
-        dom.style.height = mouse_end.y - mouse_start.y + 'px';
-
-        document.body.appendChild(dom);
-    }
-
-    const mousedown = (e) => {
-        const dom = document.querySelector('.modal');
-        dom && document.body.removeChild(dom)
-
-        mouse_start = {
-            x: e.pageX,
-            y: e.pageY
-        }
-
-       document.addEventListener('mousemove', mousemove);
-    }
-
-    const mouseup = (e) => {
-   
-        mouse_end = {
-            x: e.pageX,
-            y: e.pageY
-        }
-
-        document.removeEventListener('mousemove', mousemove);
-
-        console.log(mouse_start, mouse_end);
-      
-        const range_start = [mouse_start.x, mouse_end.x], 
-         rang_end = [mouse_start.y, mouse_end.y];
-
-        const result = content.reduce((prev,cur)=>{
-            // debugger
-            if(isInFuncArea(cur, range_start, rang_end)) {
-                cur.el.classList.add('bg-1');
-                return prev.concat(cur)
-            }else {
-                cur.el.classList.remove('bg-1');
-                return prev;
+        const mousemove = (e) => {
+            mouse_end = {
+                x: e.pageX,
+                y: e.pageY
             }
-        },[]);
 
-        console.log(result)
-    }
+            removeModal();
 
-    document.addEventListener('mouseup', mouseup)
-        
-    document.addEventListener('mousedown', mousedown)
+            let dom = document.createElement('div');
+            dom.classList.add('modal');
+            dom.style.left = mouse_start.x + 'px';
+            dom.style.top = mouse_start.y + 'px';
+            dom.style.width = mouse_end.x - mouse_start.x + 'px';
+            dom.style.height = mouse_end.y - mouse_start.y + 'px';
 
-    function isInFuncArea(data, range_start, rang_end) {
-        return (data.left < range_start[1] && data.left>range_start[0] && data.top < rang_end[1] && data.top>rang_end[0])
-        || (data.right < range_start[1] && data.right > range_start[0] && data.bottom < rang_end[1] && data.top>rang_end[0])
-    }
+            document.body.appendChild(dom);
+        }
 
+        const mousedown = (e) => {
+            removeModal();
+
+            mouse_start = {
+                x: e.pageX,
+                y: e.pageY
+            }
+
+            document.addEventListener('mousemove', mousemove);
+        }
+
+        const mouseup = (e) => {
+
+            mouse_end = {
+                x: e.pageX,
+                y: e.pageY
+            }
+
+            document.removeEventListener('mousemove', mousemove);
+
+            result = content.reduce((prev, cur) => {
+                let choosed = isInFuncArea(cur, mouse_start, mouse_end);
+                if (!choosed) choosed = isFuncAreaInItem(cur, mouse_start, mouse_end);
+                if (choosed) {
+                    cur.el.classList.add('red');
+                    return prev.concat(cur)
+                } else {
+                    cur.el.classList.remove('red');
+                    return prev;
+                }
+            }, []);
+
+            console.log(result)
+        }
+
+        document.addEventListener('mouseup', mouseup)
+
+        document.addEventListener('mousedown', mousedown)
+
+
+        window.addEventListener('resize', (e) => {
+            content.forEach(i => i.el.classList.remove('red'));
+            removeModal();
+            content = calcBoxList();
+        })
+
+        function removeModal() {
+            const dom = document.querySelector('.modal');
+            dom && document.body.removeChild(dom)
+        }
+
+        function isInFuncArea({ bottom_left, bottom_right, top_left, top_right }, { x: start_x, y: start_y }, { x: end_x, y: end_y }) {
+            let [bottom_left_x, bottom_left_y] = bottom_left,
+                [bottom_right_x, bottom_right_y] = bottom_right,
+                [top_left_x, top_left_y] = top_left,
+                [top_right_x, top_right_y] = top_right;
+            return (bottom_right_x > start_x && bottom_right_x < end_x && bottom_right_y > start_y && bottom_right_y < end_y)
+                || (bottom_left_x > start_x && bottom_left_x < end_x && bottom_left_y > start_y && bottom_left_y < end_y)
+                || (top_left_x > start_x && top_left_x < end_x && top_left_y > start_y && top_left_y < end_y)
+                || (top_right_x > start_x && top_right_x < end_x && top_right_y > start_y && top_right_y < end_y)
+        }
+
+        function isFuncAreaInItem({ top, left, max_left, max_top }, { x: start_x, y: start_y }, { x: end_x, y: end_y }) {
+            if (max_left < start_x || top > end_y) return false;
+            return (start_x < max_left && start_x > left && start_y > top && start_y < max_top)
+                || (end_x < max_left && end_x > left && end_x > top && end_y < max_top)
+                || (start_x < left && end_x > max_left && start_y > top && end_y < max_top)
+        }
     </script>
 </body>
+
 </html>
